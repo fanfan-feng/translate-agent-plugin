@@ -102,6 +102,37 @@ The tool works with any service that provides an OpenAI-compatible chat completi
 }
 ```
 
+## Install via AI Agent
+
+If you're using an AI coding assistant (Cursor, Claude, Windsurf, etc.), copy the prompt below and send it to your agent. It will handle the entire setup for you.
+
+<details>
+<summary>📋 Click to copy the prompt</summary>
+
+```
+Help me install the Translate Agent tool on my Mac. Follow these steps:
+
+1. Clone the repo:
+   git clone https://github.com/fanfan-feng/translate-agent-plugin.git ~/translate-agent-plugin
+
+2. Create the config file:
+   cp ~/translate-agent-plugin/config.example.json ~/translate-agent-plugin/config.json
+
+3. Ask me which AI provider I want to use (DeepSeek / OpenAI / Moonshot / Ollama / other)
+   and ask me for my API key. Then write the correct base_url, model, and api_key
+   into ~/translate-agent-plugin/config.json.
+
+4. Run the install script:
+   cd ~/translate-agent-plugin && chmod +x install.sh && ./install.sh
+
+5. Verify by running a quick test:
+   echo "Hello, world!" | python3 ~/translate-agent-plugin/translate.py --replace
+
+6. Tell me the result and how to use it (right-click → Services → AI Translate).
+```
+
+</details>
+
 ## Keyboard Shortcut
 
 Go to **System Settings → Keyboard → Keyboard Shortcuts → Services**, find "AI Translate" and assign a shortcut (e.g. `⌘⇧T`).

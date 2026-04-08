@@ -104,6 +104,37 @@ chmod +x install.sh
 }
 ```
 
+## 通过 AI Agent 安装
+
+如果你在使用 AI 编程助手（Cursor、Claude、Windsurf 等），复制下面的 prompt 发送给你的 Agent，它会自动完成全部安装配置。
+
+<details>
+<summary>📋 点击展开 prompt</summary>
+
+```
+帮我在 Mac 上安装 Translate Agent 翻译工具，按以下步骤执行：
+
+1. 克隆仓库：
+   git clone https://github.com/fanfan-feng/translate-agent-plugin.git ~/translate-agent-plugin
+
+2. 创建配置文件：
+   cp ~/translate-agent-plugin/config.example.json ~/translate-agent-plugin/config.json
+
+3. 询问我要使用哪个 AI 服务商（DeepSeek / OpenAI / Moonshot / Ollama / 其他），
+   并询问我的 API Key。然后将正确的 base_url、model 和 api_key
+   写入 ~/translate-agent-plugin/config.json。
+
+4. 执行安装脚本：
+   cd ~/translate-agent-plugin && chmod +x install.sh && ./install.sh
+
+5. 运行一个快速测试验证安装：
+   echo "Hello, world!" | python3 ~/translate-agent-plugin/translate.py --replace
+
+6. 告诉我测试结果，并说明使用方法（右键 → 服务 → AI Translate）。
+```
+
+</details>
+
 ## 键盘快捷键
 
 前往 **系统设置 → 键盘 → 键盘快捷键 → 服务**，找到「AI Translate」并分配快捷键（如 `⌘⇧T`）。
