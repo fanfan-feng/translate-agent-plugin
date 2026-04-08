@@ -1,21 +1,50 @@
-# DeepSeek 翻译 Agent
+# Translate Agent
 
-一个轻量级的 macOS 右键翻译工具，通过 DeepSeek API 实现智能翻译。
+A lightweight macOS right-click translation tool powered by AI. Works with any OpenAI-compatible API.
 
-选中任意文字 → 右键 → 服务 → **DeepSeek 翻译**，即可获得翻译结果。
+一个轻量级的 macOS 右键翻译工具，支持任何兼容 OpenAI API 的 AI 服务。
 
-## 功能特点
+---
 
-- 自动检测语言方向：中文 → 英文，其他语言 → 中文
-- 翻译结果弹窗显示，并自动复制到剪贴板
-- 零依赖，仅使用 Python 标准库
-- 一键安装/卸载
+## Features / 功能特点
 
-## 快速开始
+- **Right-click to translate** — Integrates into macOS context menu via Quick Actions
+  
+  **右键即翻译** — 通过 macOS 快捷操作集成到右键菜单
 
-### 1. 配置 API Key
+- **Two modes** — View translation in a dialog, or replace selected text directly in input fields
+  
+  **两种模式** — 弹窗查看翻译结果，或在输入框中直接替换选中文本
 
-编辑 `config.json`，填入你的 DeepSeek API Key：
+- **Auto language detection** — Chinese ⇄ English, powered by AI
+  
+  **自动语言检测** — 中英文自动互译，由 AI 判断翻译方向
+
+- **Loading state** — Visual feedback while translating, with cancel support
+  
+  **加载状态** — 翻译过程中有视觉反馈，支持取消
+
+- **Zero dependencies** — Pure Python standard library, no pip install needed
+  
+  **零依赖** — 纯 Python 标准库，无需安装第三方包
+
+- **Multi-provider** — Works with DeepSeek, OpenAI, Moonshot, Ollama, and any OpenAI-compatible API
+  
+  **多服务商** — 支持 DeepSeek、OpenAI、Moonshot、Ollama 等所有兼容 OpenAI API 的服务
+
+## Quick Start / 快速开始
+
+### 1. Configure / 配置
+
+Copy the example config and fill in your API key:
+
+复制配置模板并填写你的 API Key：
+
+```bash
+cp config.example.json config.json
+```
+
+Edit `config.json`:
 
 ```json
 {
@@ -25,62 +54,131 @@
 }
 ```
 
-API Key 可在 [DeepSeek 开放平台](https://platform.deepseek.com/) 获取。
-
-### 2. 安装到右键菜单
+### 2. Install / 安装
 
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-### 3. 使用
+### 3. Use / 使用
 
-1. 在任意应用中选中一段文字
-2. 右键点击 → **服务** → **DeepSeek 翻译**
-3. 等待翻译完成，结果会弹窗显示并自动复制到剪贴板
+1. Select text in any app / 在任意应用中选中文字
+2. Right-click → **Services** → **AI Translate** / 右键 → **服务** → **AI Translate**
+3. Translation appears in a dialog and is copied to clipboard / 翻译结果弹窗显示并复制到剪贴板
 
-### 4. 设置快捷键（可选）
+To replace selected text directly (in editable fields):
 
-前往 **系统设置 → 键盘 → 键盘快捷键 → 服务 → 文本**，找到「DeepSeek 翻译」，为其分配一个快捷键（如 `⌘+⇧+T`）。
+在输入框中直接替换选中文本：
 
-## 卸载
+Right-click → **Services** → **AI Translate & Replace**
+
+右键 → **服务** → **AI Translate & Replace**
+
+## Provider Configuration / 服务商配置
+
+The tool works with any service that provides an OpenAI-compatible chat completions API. Here are some examples:
+
+本工具支持任何提供 OpenAI 兼容聊天补全 API 的服务。以下是一些配置示例：
+
+### DeepSeek
+
+```json
+{
+    "api_key": "sk-xxx",
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-chat"
+}
+```
+
+### OpenAI
+
+```json
+{
+    "api_key": "sk-xxx",
+    "base_url": "https://api.openai.com",
+    "model": "gpt-4o-mini"
+}
+```
+
+### Moonshot (Kimi)
+
+```json
+{
+    "api_key": "sk-xxx",
+    "base_url": "https://api.moonshot.cn",
+    "model": "moonshot-v1-8k"
+}
+```
+
+### Ollama (Local / 本地)
+
+```json
+{
+    "api_key": "ollama",
+    "base_url": "http://localhost:11434",
+    "model": "qwen2.5"
+}
+```
+
+### Silicon Flow
+
+```json
+{
+    "api_key": "sk-xxx",
+    "base_url": "https://api.siliconflow.cn",
+    "model": "Qwen/Qwen2.5-7B-Instruct"
+}
+```
+
+## Keyboard Shortcut / 键盘快捷键
+
+You can assign a keyboard shortcut for faster access:
+
+你可以设置快捷键以更快速地使用：
+
+**System Settings → Keyboard → Keyboard Shortcuts → Services**
+
+**系统设置 → 键盘 → 键盘快捷键 → 服务**
+
+Find "AI Translate" and assign a shortcut (e.g. `⌘⇧T`).
+
+找到「AI Translate」并分配快捷键（如 `⌘⇧T`）。
+
+## Uninstall / 卸载
 
 ```bash
 chmod +x uninstall.sh
 ./uninstall.sh
 ```
 
-## 配置说明
+## Troubleshooting / 常见问题
 
-| 字段 | 说明 | 默认值 |
-|------|------|--------|
-| `api_key` | DeepSeek API Key | （必填） |
-| `base_url` | API 接口地址 | `https://api.deepseek.com` |
-| `model` | 模型名称 | `deepseek-chat` |
+**Q: Menu items not showing? / 右键菜单中看不到？**
 
-## 常见问题
+Go to System Settings → Keyboard → Keyboard Shortcuts → Services, and make sure both "AI Translate" options are enabled. If still not visible, try logging out and back in.
 
-**Q: 右键菜单中没有「DeepSeek 翻译」选项？**
+前往 系统设置 → 键盘 → 键盘快捷键 → 服务，确认两个选项已勾选。如果仍不显示，尝试注销并重新登录。
 
-前往 系统设置 → 键盘 → 键盘快捷键 → 服务，确认「DeepSeek 翻译」已勾选。如果仍不显示，尝试注销并重新登录。
+**Q: Which apps are supported? / 支持哪些应用？**
 
-**Q: 可以使用其他兼容 OpenAI API 的服务吗？**
+All apps that support macOS standard text selection: Safari, Chrome, Notes, Pages, Xcode, VS Code, etc.
 
-可以。修改 `config.json` 中的 `base_url` 和 `model` 即可，例如使用 OpenAI、Moonshot 等。
+所有支持 macOS 标准文本选择的应用：Safari、Chrome、备忘录、Pages、Xcode、VS Code 等。
 
-**Q: 支持哪些应用？**
-
-支持所有遵循 macOS 标准文本选择的应用，如 Safari、Chrome、备忘录、Pages、Xcode 等。
-
-## 项目结构
+## Project Structure / 项目结构
 
 ```
 translate-agent-plugin/
-├── translate.py       # 核心翻译脚本
-├── config.json        # API 配置文件
-├── install.sh         # 安装脚本
-├── uninstall.sh       # 卸载脚本
-├── requirements.txt   # 依赖说明
-└── README.md          # 本文件
+├── translate.py          # Core translation script / 核心翻译脚本
+├── config.example.json   # Config template / 配置模板
+├── config.json           # Your config (git-ignored) / 你的配置（不上传）
+├── install.sh            # Installer / 安装脚本
+├── uninstall.sh          # Uninstaller / 卸载脚本
+├── requirements.txt      # Dependencies (none) / 依赖说明（无）
+└── README.md
 ```
+
+## License / 许可
+
+MIT

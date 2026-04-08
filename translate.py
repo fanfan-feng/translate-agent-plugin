@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
 """
-DeepSeek 翻译 Agent — macOS 右键菜单翻译工具
-自动检测语言方向：中文 → 英文，其他语言 → 中文
+Translate Agent — macOS 右键菜单翻译工具
+支持任何兼容 OpenAI API 的服务（DeepSeek / OpenAI / Moonshot / Ollama 等）
+自动检测语言方向：中文 ⇄ 英文
 """
 
 import json
 import os
-import signal
 import subprocess
 import sys
 import urllib.request
 import urllib.error
-import threading
 
+APP_NAME = "Translate Agent"
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 
 
 def load_config():
     if not os.path.exists(CONFIG_PATH):
-        show_dialog("错误", "找不到 config.json，请先配置 API Key。")
+        show_dialog("错误", "找不到 config.json，请先配置 API Key。\n请复制 config.example.json 为 config.json 并填写配置。")
         sys.exit(1)
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
 def detect_result_language(text: str) -> str:
-    """根据文本内容判断语言，用于翻译完成后确定实际方向"""
+    """根据翻译结果判断目标语言"""
     chinese_chars = sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
     if chinese_chars / max(len(text.strip()), 1) > 0.15:
         return "中文"
@@ -35,7 +35,7 @@ def detect_result_language(text: str) -> str:
 def translate(text: str, config: dict) -> str:
     api_key = config.get("api_key", "")
     if not api_key:
-        return "错误：请在 config.json 中填写 DeepSeek API Key"
+        return "错误：请在 config.json 中填写 API Key"
 
     base_url = config.get("base_url", "https://api.deepseek.com")
     model = config.get("model", "deepseek-chat")
@@ -119,10 +119,10 @@ class LoadingDialog:
 
     def __init__(self):
         script = (
-            'display dialog "⏳ 正在翻译，请稍候..." '
-            'with title "DeepSeek 翻译" '
-            'buttons {"取消"} '
-            'giving up after 120'
+            f'display dialog "⏳ 正在翻译，请稍候..." '
+            f'with title "{APP_NAME}" '
+            f'buttons {{"取消"}} '
+            f'giving up after 120'
         )
         self._proc = subprocess.Popen(
             ["osascript", "-e", script],
@@ -145,7 +145,7 @@ class LoadingDialog:
 def translate_with_loading(text: str, config: dict, replace_mode: bool):
     """带 loading 状态的翻译流程"""
     if replace_mode:
-        show_notification("DeepSeek 翻译", "⏳ 正在翻译...")
+        show_notification(APP_NAME, "⏳ 正在翻译...")
         result = translate(text, config)
         target_lang = detect_result_language(result)
         sys.stdout.write(result)
@@ -169,7 +169,7 @@ def main():
     text = sys.stdin.read().strip()
     if not text:
         if not replace_mode:
-            show_dialog("翻译 Agent", "没有选中任何文本。")
+            show_dialog(APP_NAME, "没有选中任何文本。")
         return
 
     config = load_config()

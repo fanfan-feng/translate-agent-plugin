@@ -1,53 +1,58 @@
 #!/bin/bash
 #
-# 安装 DeepSeek 翻译 Agent 到 macOS 右键菜单（Quick Action / 快捷操作）
+# Install Translate Agent to macOS right-click menu (Quick Action / Services)
+# 安装 Translate Agent 到 macOS 右键菜单（快捷操作 / 服务）
 #
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVICES_DIR="$HOME/Library/Services"
-WORKFLOW_NAME="DeepSeek 翻译"
+WORKFLOW_NAME="AI Translate"
 WORKFLOW_DIR="$SERVICES_DIR/${WORKFLOW_NAME}.workflow"
-REPLACE_WORKFLOW_NAME="DeepSeek 翻译替换"
+REPLACE_WORKFLOW_NAME="AI Translate & Replace"
 REPLACE_WORKFLOW_DIR="$SERVICES_DIR/${REPLACE_WORKFLOW_NAME}.workflow"
 
-echo "=== DeepSeek 翻译 Agent 安装程序 ==="
+echo "=== Translate Agent Installer ==="
 echo ""
 
-# 检查 config.json
+# 检查 config.json / Check config.json
 if [ ! -f "$SCRIPT_DIR/config.json" ]; then
-    echo "❌ 找不到 config.json，请先创建配置文件。"
+    echo "❌ config.json not found."
+    echo "   Please copy config.example.json to config.json and fill in your API key."
+    echo "   cp config.example.json config.json"
     exit 1
 fi
 
 API_KEY=$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/config.json'))['api_key'])")
-if [ -z "$API_KEY" ]; then
-    echo "⚠️  config.json 中的 api_key 为空，请填写你的 DeepSeek API Key。"
-    echo "   编辑文件: $SCRIPT_DIR/config.json"
+if [ -z "$API_KEY" ] || [ "$API_KEY" = "sk-your-api-key-here" ]; then
+    echo "⚠️  api_key is empty or still using placeholder."
+    echo "   Edit: $SCRIPT_DIR/config.json"
     echo ""
-    read -p "是否继续安装？(y/n) " -n 1 -r
+    read -p "Continue anyway? (y/n) " -n 1 -r
     echo ""
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         exit 1
     fi
 fi
 
-# 创建 Services 目录
 mkdir -p "$SERVICES_DIR"
 
-# 如果已存在则先删除
-if [ -d "$WORKFLOW_DIR" ] || [ -d "$REPLACE_WORKFLOW_DIR" ]; then
-    echo "🔄 检测到已安装的版本，正在更新..."
-    rm -rf "$WORKFLOW_DIR" "$REPLACE_WORKFLOW_DIR"
-fi
+# 清理旧版本 / Clean up old versions
+for OLD_NAME in "DeepSeek 翻译" "DeepSeek 翻译替换" "$WORKFLOW_NAME" "$REPLACE_WORKFLOW_NAME"; do
+    if [ -d "$SERVICES_DIR/${OLD_NAME}.workflow" ]; then
+        echo "🔄 Removing old version: ${OLD_NAME}..."
+        rm -rf "$SERVICES_DIR/${OLD_NAME}.workflow"
+    fi
+done
 
-# 创建 workflow 目录结构
+# ==========================================
+# Quick Action 1: AI Translate (弹窗查看)
+# ==========================================
+
 mkdir -p "$WORKFLOW_DIR/Contents"
-
 TRANSLATE_SCRIPT="$SCRIPT_DIR/translate.py"
 
-# 创建 Info.plist
 cat > "$WORKFLOW_DIR/Contents/Info.plist" << 'PLIST_EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -59,7 +64,7 @@ cat > "$WORKFLOW_DIR/Contents/Info.plist" << 'PLIST_EOF'
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>DeepSeek 翻译</string>
+				<string>AI Translate</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>runWorkflowAsService</string>
@@ -73,7 +78,6 @@ cat > "$WORKFLOW_DIR/Contents/Info.plist" << 'PLIST_EOF'
 </plist>
 PLIST_EOF
 
-# 创建 document.wflow
 cat > "$WORKFLOW_DIR/Contents/document.wflow" << WFLOW_EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -265,8 +269,7 @@ cat > "$WORKFLOW_DIR/Contents/document.wflow" << WFLOW_EOF
 WFLOW_EOF
 
 # ==========================================
-# 创建「DeepSeek 翻译替换」Quick Action
-# 在可编辑区域中直接替换选中文本为翻译结果
+# Quick Action 2: AI Translate & Replace (直接替换)
 # ==========================================
 
 mkdir -p "$REPLACE_WORKFLOW_DIR/Contents"
@@ -282,7 +285,7 @@ cat > "$REPLACE_WORKFLOW_DIR/Contents/Info.plist" << 'PLIST_EOF'
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>DeepSeek 翻译替换</string>
+				<string>AI Translate &amp; Replace</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>runWorkflowAsService</string>
@@ -490,22 +493,22 @@ cat > "$REPLACE_WORKFLOW_DIR/Contents/document.wflow" << WFLOW_EOF
 </plist>
 WFLOW_EOF
 
-# 刷新 Services 菜单
+# 刷新 Services 菜单 / Refresh Services menu
 /System/Library/CoreServices/pbs -flush 2>/dev/null || true
 
 echo ""
-echo "✅ 安装成功！"
+echo "✅ Installation complete!"
 echo ""
-echo "📍 已安装两个 Quick Action:"
-echo "   1. DeepSeek 翻译       → 弹窗显示翻译结果 + 复制到剪贴板"
-echo "   2. DeepSeek 翻译替换   → 直接替换选中文本为翻译结果（适用于输入框）"
+echo "📍 Installed Quick Actions:"
+echo "   1. AI Translate          → Show translation in dialog + copy to clipboard"
+echo "   2. AI Translate & Replace → Replace selected text with translation (for input fields)"
 echo ""
-echo "使用方法:"
-echo "  在任意应用中选中文字 → 右键 → 服务 → 选择对应操作"
+echo "Usage:"
+echo "  Select text in any app → Right-click → Services → Choose an action"
 echo ""
-echo "💡 提示："
-echo "  - 如果右键菜单中没有看到，请前往:"
-echo "    系统设置 → 键盘 → 键盘快捷键 → 服务"
-echo "    确保两个选项都已勾选"
-echo "  - 你也可以在上述设置中为它们分配键盘快捷键"
+echo "💡 Tips:"
+echo "  - If not visible in the menu, go to:"
+echo "    System Settings → Keyboard → Keyboard Shortcuts → Services"
+echo "    and enable both options"
+echo "  - You can also assign keyboard shortcuts there"
 echo ""
